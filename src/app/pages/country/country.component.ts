@@ -1,67 +1,62 @@
-import {HttpClient, HttpErrorResponse} from '@angular/common/http';
-import {Component, OnInit} from '@angular/core';
-import {ActivatedRoute, ParamMap, Router} from '@angular/router';
-import Chart from 'chart.js/auto';
-
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, ParamMap, Router } from '@angular/router';
+import { Olympic } from '../../models/olympic.model';
+import { CountryStats, OlympicDataService } from '../../services/olympic-data.service';
+import { Indicator } from '../../models/indicator.model';
 
 @Component({
   selector: 'app-country',
   templateUrl: './country.component.html',
-  styleUrls: ['./country.component.scss']
+  styleUrls: ['./country.component.scss'],
 })
 export class CountryComponent implements OnInit {
-  private olympicUrl = './assets/mock/olympic.json';
-  public lineChart!: Chart<"line", string[], number>;
-  public titlePage: string = '';
-  public totalEntries: any = 0;
-  public totalMedals: number = 0;
-  public totalAthletes: number = 0;
-  public error!: string;
+  public indicators: Indicator[] = [];
+  public titlePage = '';
+  public totalEntries = 0;
+  public totalMedals = 0;
+  public totalAthletes = 0;
+  public error = '';
+  public lineChartLabels: number[] = [];
+  public lineChartData: number[] = [];
+  public lineChartBackground = '#0b868f';
 
-  constructor(private route: ActivatedRoute, private router: Router, private http: HttpClient) {
-  }
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private olympicDataService: OlympicDataService
+  ) {}
 
-  ngOnInit() {
-    let countryName: string | null = null
-    this.route.paramMap.subscribe((param: ParamMap) => countryName = param.get('countryName'));
-    this.http.get<any[]>(this.olympicUrl).pipe().subscribe(
-      (data) => {
-        if (data && data.length > 0) {
-          const selectedCountry = data.find((i: any) => i.country === countryName);
-          this.titlePage = selectedCountry.country;
-          const participations = selectedCountry?.participations.map((i: any) => i);
-          this.totalEntries = participations?.length ?? 0;
-          const years = selectedCountry?.participations.map((i: any) => i.year) ?? [];
-          const medals = selectedCountry?.participations.map((i: any) => i.medalsCount.toString()) ?? [];
-          this.totalMedals = medals.reduce((accumulator: any, item: any) => accumulator + parseInt(item), 0);
-          const nbAthletes = selectedCountry?.participations.map((i: any) => i.athleteCount.toString()) ?? []
-          this.totalAthletes = nbAthletes.reduce((accumulator: any, item: any) => accumulator + parseInt(item), 0);
-          this.buildChart(years, medals);
-        }
-      },
-      (error: HttpErrorResponse) => {
-        this.error = error.message
-      }
-    );
-  }
-
-  buildChart(years: number[], medals: string[]) {
-    const lineChart = new Chart("countryChart", {
-      type: 'line',
-      data: {
-        labels: years,
-        datasets: [
-          {
-            label: "medals",
-            data: medals,
-            backgroundColor: '#0b868f'
-          },
-        ]
-      },
-      options: {
-        aspectRatio: 2.5
-      }
+  ngOnInit(): void {
+    this.route.paramMap.subscribe((params: ParamMap) => {
+      const countryName = params.get('countryName');
+      this.loadCountry(countryName);
     });
-    this.lineChart = lineChart;
+  }
+
+  private loadCountry(countryName: string | null): void {
+    this.olympicDataService.getCountryByName(countryName).subscribe({
+      next: (olympic: Olympic | undefined) => {
+        if (!olympic) {
+          this.router.navigate(['/not-found']);
+          return;
+        }
+
+        this.setCountryData(olympic);
+      },
+      error: (error) => {
+        this.error = error.message ?? 'Unable to load country data.';
+      },
+    });
+  }
+
+  private setCountryData(olympic: Olympic): void {
+    this.titlePage = olympic.country;
+    const stats: CountryStats = this.olympicDataService.getOlympicStats(olympic);
+    this.totalEntries = stats.totalEntries;
+    this.totalMedals = stats.totalMedals;
+    this.totalAthletes = stats.totalAthletes;
+    this.indicators = stats.indicators;
+    this.lineChartLabels = stats.years;
+    this.lineChartData = stats.medals;
   }
 }
