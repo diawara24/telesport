@@ -76,5 +76,7 @@ Voici l’architecture principale du projet :
 ## Captures d’écran
 
 ![Capture de TeleSport](src/assets/images/teleSport.png)
+![Capture de TeleSport](src/assets/images/mobile-tablette.png)
+![Capture de TeleSport](src/assets/images/pc.png)
 
-> Si l’image ne s’affiche pas dans GitHub, vérifiez que le chemin relatif `src/assets/images/teleSport.png` est bien présent dans le dépôt.
+> Si l’image ne s’affiche pas dans GitHub, vérifiez que le chemin relatif `src/assets/images/` est bien présent dans le dépôt. `https://github.com/diawara24/telesport.git`
