@@ -12,7 +12,6 @@ import { Indicator } from '../../models/indicator.model';
 export class HomeComponent implements OnInit {
   public totalCountries = 0;
   public totalJOs = 0;
-  public error = '';
   public titlePage = 'Medals per Country';
   public indicators: Indicator[] = [];
 
@@ -36,9 +35,6 @@ export class HomeComponent implements OnInit {
 
         this.pieChartLabels = this.olympicDataService.getCountryNames(olympics);
         this.pieChartData = this.olympicDataService.getMedalCountsByCountry(olympics);
-      },
-      error: (error) => {
-        this.error = error.message ?? 'Unable to load Olympic data.';
       },
     });
   }

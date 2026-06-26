@@ -43,9 +43,6 @@ export class CountryComponent implements OnInit {
 
         this.setCountryData(olympic);
       },
-      error: (error) => {
-        this.error = error.message ?? 'Unable to load country data.';
-      },
     });
   }
 
