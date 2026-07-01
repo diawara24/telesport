@@ -1,6 +1,8 @@
 <h2>Olympic games app</h2>
 <hr />
-<div>
+<div *ngIf="isLoading">Loading data...</div>
+<div *ngIf="error" class="error">{{ error }}</div>
+<div *ngIf="!isLoading && !error">
   <app-header [title]="titlePage" [indicators]="indicators"></app-header>
   <app-chart
     type="pie"

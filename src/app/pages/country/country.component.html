@@ -1,4 +1,6 @@
-<div>
+<div *ngIf="isLoading">Loading country data...</div>
+<div *ngIf="error" class="error">{{ error }}</div>
+<div *ngIf="!isLoading && !error">
   <app-header [title]="titlePage" [indicators]="indicators"></app-header>
   <div class="chart-container wrapper-container">
     <div class="container">

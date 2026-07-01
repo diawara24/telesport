@@ -14,6 +14,8 @@ export class HomeComponent implements OnInit {
   public totalJOs = 0;
   public titlePage = 'Medals per Country';
   public indicators: Indicator[] = [];
+  public isLoading = true;
+  public error = '';
 
   // inputs for the shared chart component
   public pieChartLabels: string[] = [];
@@ -23,18 +25,22 @@ export class HomeComponent implements OnInit {
   constructor(private router: Router, private olympicDataService: OlympicDataService) {}
 
   ngOnInit(): void {
+    this.isLoading = true;
+    this.error = '';
+
     this.olympicDataService.getOlympics().subscribe({
       next: (olympics: Olympic[]) => {
-        this.totalCountries = this.olympicDataService.getTotalOlympics(olympics);
-        this.totalJOs = this.olympicDataService.getTotalJOs(olympics);
-
-        this.indicators = [
-          { label: 'Number of Countries: ', value: this.totalCountries },
-          { label: 'Number of JOs: ', value: this.totalJOs },
-        ];
-
-        this.pieChartLabels = this.olympicDataService.getCountryNames(olympics);
-        this.pieChartData = this.olympicDataService.getMedalCountsByCountry(olympics);
+        const overview = this.olympicDataService.getOlympicOverview(olympics);
+        this.totalCountries = overview.totalCountries;
+        this.totalJOs = overview.totalJOs;
+        this.indicators = overview.indicators;
+        this.pieChartLabels = overview.pieChartLabels;
+        this.pieChartData = overview.pieChartData;
+        this.isLoading = false;
+      },
+      error: () => {
+        this.error = 'Unable to load Olympic data. Please try again later.';
+        this.isLoading = false;
       },
     });
   }

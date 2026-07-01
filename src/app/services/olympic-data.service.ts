@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { map, Observable } from 'rxjs';
+import { catchError, map, Observable, throwError } from 'rxjs';
 import { Olympic } from '../models/olympic.model';
 import { Indicator } from '../models/indicator.model';
 import { environment } from 'src/environments/environment';
@@ -24,7 +24,9 @@ export class OlympicDataService {
   constructor(private http: HttpClient) {}
 
   getOlympics(): Observable<Olympic[]> {
-    return this.http.get<Olympic[]>(this.olympicUrl);
+    return this.http.get<Olympic[]>(this.olympicUrl).pipe(
+      catchError(() => throwError(() => new Error('Unable to load Olympic data.')))
+    );
   }
 
   getTotalOlympics(olympics: Olympic[]): number {
@@ -43,6 +45,19 @@ export class OlympicDataService {
 
   getMedalCountsByCountry(olympics: Olympic[]): number[] {
     return olympics.map((olympic) => olympic.participations.reduce((sum, participation) => sum + participation.medalsCount, 0));
+  }
+
+  getOlympicOverview(olympics: Olympic[]) {
+    return {
+      totalCountries: this.getTotalOlympics(olympics),
+      totalJOs: this.getTotalJOs(olympics),
+      indicators: [
+        { label: 'Number of Countries: ', value: this.getTotalOlympics(olympics) },
+        { label: 'Number of JOs: ', value: this.getTotalJOs(olympics) },
+      ],
+      pieChartLabels: this.getCountryNames(olympics),
+      pieChartData: this.getMedalCountsByCountry(olympics),
+    };
   }
 
   getCountryByName(countryName: string | null): Observable<Olympic | undefined> {

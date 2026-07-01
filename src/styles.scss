@@ -36,10 +36,10 @@ hr {
 }
 
 .split {
-  display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
+  display: flex;
+  justify-content: center;
+  align-items: center;
   gap: 1rem;
-  margin: 0;
   div {
     grid-column: span 4;
     padding: 10px;
